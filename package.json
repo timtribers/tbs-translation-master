@@ -1,0 +1,17 @@
+{
+  "name": "tbs-translation-master",
+  "version": "0.0.1",
+  "description": "An enrichment framework for preparing Bible files for publication",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "TNT",
+  "license": "Proprietary",
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-clean": "^0.7.0",
+    "grunt-contrib-concat": "^0.5.1",
+    "grunt-contrib-copy": "^0.8.2"
+  }
+}
