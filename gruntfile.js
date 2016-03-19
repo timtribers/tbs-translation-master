@@ -3,12 +3,12 @@ module.exports = function(grunt) {
   // Project configuration.
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
-    clean: ['build','dist'],
+    clean: ['_build','_dist'],
     rtf2usx: {
       main: {
         expand: true,
         src: 'source/**/*.rtf',
-        dest: 'build/',
+        dest: '_build/',
         ext: '.usx',
         flatten: true,
         filter: 'isFile',
@@ -51,10 +51,54 @@ module.exports = function(grunt) {
       },
     },
     copy: {
+      btx2tbx: {
+        expand: true,
+        src: 'source/**/*.btx',
+        dest: '_build/',
+        ext: '.tbx',
+        flatten: true,
+        filter: 'isFile',
+        options: {
+          process: function (content, srcpath) {
+            //var book = srcpath.substr(srcpath.lastIndexOf('/')+1,3);
+
+            var start = '<?xml version="1.0" encoding="utf-8"?>\n' +
+                        '<tbx version="1.0">\n';
+
+            var bk = '';
+            var ch = '0';
+            var body = '\n';
+
+            var lines = content.replace(/[\r]/g,'').split('\n');
+            for(var i = 0;i < lines.length;i++){
+              if (lines[i].match(/^#{1,3}/) != null) {
+                if (lines[i].match(/^###(\w{2,5})\s{0,10}$/) != null) bk = lines[i].replace(/^###(\w{2,5})\s{0,10}$/,'$1');
+                if (lines[i].match(/^##(\d{1,3})\s{0,10}/) != null) ch = lines[i].replace(/^##(\d{1,3})\s{0,10}/,'$1');
+                lines[i] = lines[i].replace(/^###(\w{2,5})\s{0,10}$/,''); // remove book 
+                lines[i] = lines[i].replace(/^##(\d{1,3})\s{0,10}$/,'\t</ch>\n\t<ch id="' + bk + '_$1" no="$1">\n'); // mark chapters
+                lines[i] = lines[i].replace(/^#(\d{1,3})\s{0,10}$/,'\t\t<vs id="' + bk + '_' + ch + '_$1" no="$1"></vs>\n'); // mark empty verses
+                lines[i] = lines[i].replace(/^#(\d{1,3})\s{1,10}(.{0,1000})$/,'\t\t<vs id="' + bk + '_' + ch + '_$1" no="$1">$2</vs>\n'); // mark verses
+                body += lines[i]; // keep only # lines
+              }
+            }
+
+            //body = body.replace(/\n###(\w{2,5})\s{0,10}\n/g,'\n'); // remove book 
+            //body = body.replace(/\n##(\d{1,3})\s{0,10}\n/g,'\n\t</ch>\n\n\t<ch no="$1">\n'); // mark chapters
+            //body = body.replace(/\n#(\d{1,3})\s{0,10}\n/g,'\n\t\t<vs no="$1"></vs>'); // mark empty verses
+            //body = body.replace(/\n#(\d{1,3})\s{1,10}(.{0,1000})/g,'\n\t\t<vs no="$1">$2</vs>'); // mark verses
+            body = body.replace(/\n\t\<\/ch\>\n/,''); // remove first ch end
+   
+            var end = '\t</ch>\n' +
+                      '</tbx>\n';
+
+            return start + body + end;
+          },
+        },
+      },
       txt2usx: {
         expand: true,
         src: 'source/**/*.txt',
-        dest: 'build/',
+        dest: '_build/',
         ext: '.usx',
         flatten: true,
         filter: 'isFile',
@@ -84,7 +128,7 @@ module.exports = function(grunt) {
       htm2usx: {
         expand: true,
         src: 'source/**/*.htm',
-        dest: 'build/',
+        dest: '_build/',
         ext: '.usx',
         flatten: true,
         filter: 'isFile',
@@ -128,7 +172,7 @@ module.exports = function(grunt) {
       htm2tbx: {
         expand: true,
         src: 'source/**/*.htm',
-        dest: 'build/',
+        dest: '_build/',
         ext: '.tbx',
         flatten: true,
         filter: 'isFile',
@@ -178,7 +222,7 @@ module.exports = function(grunt) {
       htm2tbx2: {
         expand: true,
         src: 'source/**/*.htm',
-        dest: 'build/',
+        dest: '_build/',
         ext: '.tbsx',
         flatten: true,
         filter: 'isFile',
@@ -259,7 +303,7 @@ module.exports = function(grunt) {
           banner: '<bk name="joh">\n'
         },
         files: {
-          'build/joh.xml': ['translation/**/joh000.txt','translation/**/joh001.txt','translation/**/joh002.txt','translation/**/joh003.txt','translation/**/joh011.txt']
+          '_build/joh.xml': ['translation/**/joh000.txt','translation/**/joh001.txt','translation/**/joh002.txt','translation/**/joh003.txt','translation/**/joh011.txt']
         }
       }
     }
